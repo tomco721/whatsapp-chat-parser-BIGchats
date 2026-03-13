@@ -1,4 +1,10 @@
-import React, { useMemo, useEffect, useState } from 'react';
+import React, {
+  useCallback,
+  useMemo,
+  useEffect,
+  useRef,
+  useState,
+} from 'react';
 import { useAtom, useAtomValue } from 'jotai';
 
 import Message from '../Message/Message';
@@ -22,7 +28,7 @@ const INITIAL_RENDERED_MESSAGES = 300;
 const RENDER_STEP = 300;
 
 function MessageViewer() {
-  const limits = useAtomValue(limitsAtom);
+  const [limits, setLimits] = useAtom(limitsAtom);
   const [activeUser, setActiveUser] = useAtom(activeUserAtom);
   const focusedMessageIndex = useAtomValue(focusedMessageIndexAtom);
   const participants = useAtomValue(participantsAtom);
@@ -30,6 +36,8 @@ function MessageViewer() {
   const filterMode = useAtomValue(globalFilterModeAtom);
   const { start: startDate, end: endDate } = useAtomValue(datesAtom);
   const [renderLimit, setRenderLimit] = useState(INITIAL_RENDERED_MESSAGES);
+  const loadMoreTriggerRef = useRef<HTMLDivElement>(null);
+  const pendingFocusedScrollRef = useRef<number | null>(null);
   const startDateMs = startDate.getTime();
   const endDateMs = endDate.getTime();
   const colorMap: Record<string, string> = useMemo(() => {
@@ -58,7 +66,34 @@ function MessageViewer() {
   );
 
   const isLimited = renderedMessages.length !== messages.length;
-  const hasMoreMessages = visibleMessages.length < renderedMessages.length;
+  const canExpandIndexWindow =
+    filterMode === 'index' && limits.high < messages.length;
+  const hasMoreMessages =
+    visibleMessages.length < renderedMessages.length || canExpandIndexWindow;
+
+  const loadMoreMessages = useCallback(() => {
+    if (visibleMessages.length < renderedMessages.length) {
+      setRenderLimit(oldValue =>
+        Math.min(oldValue + RENDER_STEP, renderedMessages.length),
+      );
+      return;
+    }
+
+    if (!canExpandIndexWindow) return;
+
+    setLimits({
+      low: limits.low,
+      high: Math.min(limits.high + RENDER_STEP, messages.length),
+    });
+  }, [
+    canExpandIndexWindow,
+    limits.high,
+    limits.low,
+    messages.length,
+    renderedMessages.length,
+    setLimits,
+    visibleMessages.length,
+  ]);
 
   useEffect(() => {
     setActiveUser(participants[0] || '');
@@ -69,7 +104,12 @@ function MessageViewer() {
   }, [filterMode, limits.low, limits.high, startDateMs, endDateMs, messages]);
 
   useEffect(() => {
+    pendingFocusedScrollRef.current = focusedMessageIndex;
+  }, [focusedMessageIndex]);
+
+  useEffect(() => {
     if (focusedMessageIndex === null) return;
+    if (pendingFocusedScrollRef.current !== focusedMessageIndex) return;
 
     const targetPosition = renderedMessages.findIndex(
       message => message.index === focusedMessageIndex,
@@ -87,7 +127,43 @@ function MessageViewer() {
     if (!messageDOM) return;
 
     messageDOM.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    pendingFocusedScrollRef.current = null;
   }, [focusedMessageIndex, renderLimit, renderedMessages]);
+
+  useEffect(() => {
+    const triggerElement = loadMoreTriggerRef.current;
+
+    if (!triggerElement || !hasMoreMessages) {
+      return undefined;
+    }
+
+    const observer = new IntersectionObserver(
+      entries => {
+        const [entry] = entries;
+
+        if (!entry?.isIntersecting) return;
+
+        loadMoreMessages();
+      },
+      {
+        root: null,
+        rootMargin: '0px 0px 800px 0px',
+      },
+    );
+
+    observer.observe(triggerElement);
+
+    return () => observer.disconnect();
+  }, [
+    canExpandIndexWindow,
+    hasMoreMessages,
+    limits.high,
+    limits.low,
+    loadMoreMessages,
+    messages.length,
+    renderedMessages.length,
+    visibleMessages.length,
+  ]);
 
   return (
     <S.Container>
@@ -136,14 +212,15 @@ function MessageViewer() {
             );
           })}
         </S.List>
+        {hasMoreMessages && <S.LoadMoreTrigger ref={loadMoreTriggerRef} />}
         {hasMoreMessages && (
           <S.LoadMoreWrapper>
-            <S.LoadMoreButton
-              type="button"
-              onClick={() => setRenderLimit(oldValue => oldValue + RENDER_STEP)}
-            >
+            <S.LoadMoreButton type="button" onClick={loadMoreMessages}>
               Load more messages (
-              {renderedMessages.length - visibleMessages.length} remaining)
+              {filterMode === 'index'
+                ? messages.length - visibleMessages.length
+                : renderedMessages.length - visibleMessages.length}{' '}
+              remaining)
             </S.LoadMoreButton>
           </S.LoadMoreWrapper>
         )}

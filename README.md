@@ -1,6 +1,6 @@
-# WAreader
+# whatsapp-chat-parser-bigchats
 
-Fast local viewer for exported WhatsApp chats with media support, search, filtering, anonymization, and a desktop-friendly reading layout.
+Fast local viewer for exported WhatsApp chats with media support, search, filtering, anonymization, automatic incremental loading, and a desktop-friendly reading layout.
 
 This project started from the original `whatsapp-chat-parser-website`, but it has evolved into a much more capable day-to-day tool for exploring large chat exports quickly and comfortably.
 
@@ -13,6 +13,7 @@ This project started from the original `whatsapp-chat-parser-website`, but it ha
 - Lets you choose the active user to render the conversation from either side
 - Supports anonymizing participant names on the fly
 - Handles large conversations efficiently with progressive rendering
+- Automatically loads more messages while you scroll through long chats
 - Keeps all processing local in the browser
 
 ## Why This Fork
@@ -24,6 +25,7 @@ Compared to the original demo-style version, this fork is focused on usability a
 - cleaner filtering and search workflow
 - improved media handling
 - better desktop layout with a persistent sidebar on wide screens
+- smoother reading experience with automatic message loading on scroll
 - still simple to run locally with no backend
 
 ## Local Development
@@ -91,6 +93,7 @@ The production bundle is generated in `build/`.
 2. Open the app locally
 3. Drop the file into the upload area or load the example chat
 4. Browse messages, search phrases, narrow by range/date, and inspect media inline
+5. Keep scrolling to automatically load more messages in long conversations
 
 If you export the chat with media attached, the app can display supported attachments directly from the archive.
 

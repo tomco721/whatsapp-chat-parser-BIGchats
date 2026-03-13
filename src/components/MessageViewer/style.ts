@@ -65,6 +65,10 @@ const LoadMoreWrapper = styled.div`
   padding-bottom: 2rem;
 `;
 
+const LoadMoreTrigger = styled.div`
+  height: 1px;
+`;
+
 const LoadMoreButton = styled.button`
   ${normalizeButton}
 
@@ -80,6 +84,7 @@ export {
   List,
   P,
   Info,
+  LoadMoreTrigger,
   LoadMoreWrapper,
   LoadMoreButton,
 };

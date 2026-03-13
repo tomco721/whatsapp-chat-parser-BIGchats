@@ -8,9 +8,11 @@ This project started from the original `whatsapp-chat-parser-website` and has be
 
 ### Changed
 
+- Renamed the project metadata to `whatsapp-chat-parser-bigchats`
 - Repositioned the application layout so the sidebar gets its own desktop column instead of overlapping the chat viewer
 - Centered the conversation area more naturally on wide screens while keeping the sidebar pinned to the left
 - Kept the mobile and narrow-screen slide-out sidebar behavior for smaller displays
+- Extended the default message browsing flow so loading more messages can continue beyond the initial index window
 - Updated the credits link to point to the fork repository
 - Rewrote the README to reflect the current fork instead of the original demo-style project description
 - Added clearer setup notes for Windows users, including the `start.bat` workflow and `npm.cmd` fallback commands
@@ -19,6 +21,7 @@ This project started from the original `whatsapp-chat-parser-website` and has be
 
 - Better desktop usability when browsing large conversations on wide monitors
 - Cleaner reading flow by reducing wasted horizontal space in the message viewer
+- Automatic loading of additional messages while scrolling through long chats
 - More fork-ready project metadata and documentation for publishing to GitHub
 
 ## Fork Baseline
