@@ -3,7 +3,10 @@ import { parseString } from 'whatsapp-chat-parser';
 import {
   DateBounds,
   ExtractedFile,
+  FilterMode,
   IndexedMessage,
+  ILimits,
+  MediaItem,
   SearchMessagesOutput,
 } from '../types';
 import { UniqueIdGenerator } from './unique-id-generator';
@@ -171,6 +174,52 @@ function filterMessagesByDate(
   );
 }
 
+function getFilteredMessages(
+  messages: IndexedMessage[],
+  filterMode: FilterMode,
+  limits: ILimits,
+  startDate: Date,
+  endDate: Date,
+) {
+  if (filterMode === 'index') {
+    return messages.slice(limits.low - 1, limits.high);
+  }
+
+  const endDatePlusOne = new Date(endDate);
+  endDatePlusOne.setDate(endDatePlusOne.getDate() + 1);
+  return filterMessagesByDate(messages, startDate, endDatePlusOne);
+}
+
+function extractMediaItems(messages: IndexedMessage[]): MediaItem[] {
+  return messages.flatMap(message => {
+    const fileName = message.attachment?.fileName;
+
+    if (!fileName) return [];
+
+    const mimeType = getMimeType(fileName);
+    let kind: MediaItem['kind'] | null = null;
+
+    if (mimeType?.startsWith('image/')) {
+      kind = 'image';
+    } else if (mimeType?.startsWith('video/')) {
+      kind = 'video';
+    }
+
+    if (!mimeType || !kind) return [];
+
+    return [
+      {
+        index: message.index,
+        fileName,
+        author: message.author,
+        date: message.date,
+        mimeType,
+        kind,
+      },
+    ];
+  });
+}
+
 function searchMessages(
   messages: IndexedMessage[],
   rawQuery: string,
@@ -231,6 +280,8 @@ export {
   getISODateString,
   extractStartEndDatesFromMessages,
   filterMessagesByDate,
+  getFilteredMessages,
   searchMessages,
+  extractMediaItems,
   capitalize,
 };

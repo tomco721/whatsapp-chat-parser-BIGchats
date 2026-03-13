@@ -348,6 +348,30 @@ const SearchResultMeta = styled.div`
   margin-bottom: 0.2rem;
 `;
 
+const ViewSwitcher = styled.div`
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.5rem;
+`;
+
+const ViewButton = styled.button<{ $isActive: boolean }>`
+  ${normalizeButton}
+
+  padding: 0.6rem 0.75rem;
+  border-radius: 999px;
+  border: 1px solid rgba(0, 0, 0, 0.12);
+  background-color: ${props =>
+    props.$isActive ? whatsappThemeColor : 'rgba(0, 0, 0, 0.04)'};
+  color: ${props => (props.$isActive ? '#fff' : 'inherit')};
+  font-weight: 600;
+
+  @media (prefers-color-scheme: dark) {
+    border-color: #444;
+    background-color: ${props =>
+      props.$isActive ? whatsappThemeColor : '#222'};
+  }
+`;
+
 export {
   MenuOpenButton,
   MenuCloseButton,
@@ -368,4 +392,6 @@ export {
   SearchResults,
   SearchResultButton,
   SearchResultMeta,
+  ViewSwitcher,
+  ViewButton,
 };

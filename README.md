@@ -1,6 +1,6 @@
 # whatsapp-chat-parser-bigchats
 
-Fast local viewer for exported WhatsApp chats with media support, search, filtering, anonymization, automatic incremental loading, and a desktop-friendly reading layout.
+Fast local viewer for exported WhatsApp chats with media support, global media gallery, search, filtering, anonymization, automatic incremental loading, and a desktop-friendly reading layout.
 
 This project started from the original `whatsapp-chat-parser-website`, but it has evolved into a much more capable day-to-day tool for exploring large chat exports quickly and comfortably.
 
@@ -8,12 +8,14 @@ This project started from the original `whatsapp-chat-parser-website`, but it ha
 
 - Opens WhatsApp exports from `.txt` files or exported `.zip` archives
 - Renders attached media directly when the export contains images, audio, or video
+- Includes a full-chat `Media` gallery for images and videos, independent of the active message range filter
 - Filters the visible range by message index or by date
 - Searches chat content and jumps straight to matching messages with surrounding context
 - Lets you choose the active user to render the conversation from either side
 - Supports anonymizing participant names on the fly
 - Handles large conversations efficiently with progressive rendering
 - Automatically loads more messages while you scroll through long chats
+- Loads gallery media lazily for faster browsing of large chats
 - Keeps all processing local in the browser
 
 ## Why This Fork
@@ -24,8 +26,10 @@ Compared to the original demo-style version, this fork is focused on usability a
 - much faster interaction on large datasets
 - cleaner filtering and search workflow
 - improved media handling
+- full-gallery browsing for images and videos from the whole chat export
 - better desktop layout with a persistent sidebar on wide screens
 - smoother reading experience with automatic message loading on scroll
+- faster gallery loading by deferring media fetches until needed
 - still simple to run locally with no backend
 
 ## Local Development
@@ -94,6 +98,8 @@ The production bundle is generated in `build/`.
 3. Drop the file into the upload area or load the example chat
 4. Browse messages, search phrases, narrow by range/date, and inspect media inline
 5. Keep scrolling to automatically load more messages in long conversations
+6. Open the `Media` view from the sidebar to browse all images and videos from the full chat in a gallery layout
+7. Click any gallery item to open a larger preview and jump back to the original message if needed
 
 If you export the chat with media attached, the app can display supported attachments directly from the archive.
 

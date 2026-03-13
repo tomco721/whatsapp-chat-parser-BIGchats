@@ -2,6 +2,7 @@ import type { Message } from 'whatsapp-chat-parser';
 import JSZip from 'jszip';
 
 type FilterMode = 'index' | 'date';
+type ViewerMode = 'chat' | 'media';
 
 type ExtractedFile = string | JSZip | null;
 
@@ -42,8 +43,18 @@ interface SearchMessagesOutput {
   results: SearchMessageResult[];
 }
 
+interface MediaItem {
+  index: number;
+  fileName: string;
+  author: string | null;
+  date: Date;
+  mimeType: string;
+  kind: 'image' | 'video';
+}
+
 export type {
   FilterMode,
+  ViewerMode,
   ExtractedFile,
   IndexedMessage,
   ILimits,
@@ -52,4 +63,5 @@ export type {
   PollStructure,
   SearchMessageResult,
   SearchMessagesOutput,
+  MediaItem,
 };

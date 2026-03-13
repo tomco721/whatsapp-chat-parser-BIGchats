@@ -2,9 +2,10 @@ import { useEffect } from 'react';
 import { useAtomValue, useSetAtom } from 'jotai';
 
 import { showError } from './utils/utils';
-import { rawFileAtom, messagesAtom } from './stores/global';
+import { rawFileAtom, messagesAtom, viewerModeAtom } from './stores/global';
 import Dropzone from './components/Dropzone/Dropzone';
 import MessageViewer from './components/MessageViewer/MessageViewer';
+import MediaGallery from './components/MediaGallery/MediaGallery';
 import Sidebar from './components/Sidebar/Sidebar';
 import * as S from './style';
 
@@ -12,6 +13,7 @@ import exampleChat from './assets/whatsapp-chat-parser-example.zip';
 
 function App() {
   const messages = useAtomValue(messagesAtom);
+  const viewerMode = useAtomValue(viewerModeAtom);
   const setRawFile = useSetAtom(rawFileAtom);
 
   const processFile = (file: File) => {
@@ -60,7 +62,7 @@ function App() {
         </S.Header>
         <S.MainLayout>
           {messages.length > 0 && <Sidebar />}
-          <MessageViewer />
+          {viewerMode === 'media' ? <MediaGallery /> : <MessageViewer />}
         </S.MainLayout>
       </S.Container>
     </>

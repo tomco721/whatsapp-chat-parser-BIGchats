@@ -24,6 +24,7 @@ import {
   messagesAtom,
   participantsAtom,
   searchQueryAtom,
+  viewerModeAtom,
 } from '../../stores/global';
 import {
   datesAtom,
@@ -39,6 +40,7 @@ const SEARCH_CONTEXT_AFTER = 120;
 
 function Sidebar() {
   const [isMenuOpen, setIsMenuOpen] = useAtom(isMenuOpenAtom);
+  const [viewerMode, setViewerMode] = useAtom(viewerModeAtom);
   const [isAnonymous, setIsAnonymous] = useAtom(isAnonymousAtom);
   const [searchQuery, setSearchQuery] = useAtom(searchQueryAtom);
   const [filterMode, setFilterMode] = useState<FilterMode>('index');
@@ -132,6 +134,25 @@ function Sidebar() {
         </S.MenuCloseButton>
         <S.SidebarContainer>
           <S.SidebarChildren>
+            <S.Fieldset>
+              <legend>View</legend>
+              <S.ViewSwitcher>
+                <S.ViewButton
+                  type="button"
+                  $isActive={viewerMode === 'chat'}
+                  onClick={() => setViewerMode('chat')}
+                >
+                  Chat
+                </S.ViewButton>
+                <S.ViewButton
+                  type="button"
+                  $isActive={viewerMode === 'media'}
+                  onClick={() => setViewerMode('media')}
+                >
+                  Media
+                </S.ViewButton>
+              </S.ViewSwitcher>
+            </S.Fieldset>
             <FilterModeSelector
               filterMode={filterMode}
               setFilterMode={setFilterMode}

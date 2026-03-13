@@ -1,4 +1,5 @@
 import { atom } from 'jotai';
+import { ViewerMode } from '../types';
 
 import {
   extractFile,
@@ -8,6 +9,7 @@ import {
 } from '../utils/utils';
 
 const isMenuOpenAtom = atom(false);
+const viewerModeAtom = atom<ViewerMode>('chat');
 const activeUserAtom = atom('');
 const isAnonymousAtom = atom(false);
 const searchQueryAtom = atom('');
@@ -27,6 +29,7 @@ const messagesDateBoundsAtom = atom(get =>
 
 export {
   isMenuOpenAtom,
+  viewerModeAtom,
   activeUserAtom,
   isAnonymousAtom,
   searchQueryAtom,
