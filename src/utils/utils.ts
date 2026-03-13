@@ -1,6 +1,11 @@
 import JSZip from 'jszip';
 import { parseString } from 'whatsapp-chat-parser';
-import { DateBounds, ExtractedFile, IndexedMessage } from '../types';
+import {
+  DateBounds,
+  ExtractedFile,
+  IndexedMessage,
+  SearchMessagesOutput,
+} from '../types';
 import { UniqueIdGenerator } from './unique-id-generator';
 
 const getMimeType = (fileName: string) => {
@@ -73,7 +78,7 @@ const fileToText = (file: ExtractedFile) => {
 };
 
 function messagesFromFile(file: ExtractedFile, isAnonymous = false) {
-  return fileToText(file).then(text => {
+  const parseInMainThread = (text: string) => {
     const uniqueIdGenerator = new UniqueIdGenerator();
     const parsed = parseString(text, {
       parseAttachments: file instanceof JSZip,
@@ -87,6 +92,49 @@ function messagesFromFile(file: ExtractedFile, isAnonymous = false) {
     }));
 
     return replaceEncryptionMessageAuthor(parsed);
+  };
+
+  const parseInWorker = (text: string): Promise<IndexedMessage[]> =>
+    new Promise((resolve, reject) => {
+      const worker = new Worker(
+        new URL('./chat-parser.worker.ts', import.meta.url),
+        { type: 'module' },
+      );
+
+      worker.onmessage = (
+        event: MessageEvent<{ messages: IndexedMessage[] }>,
+      ) => {
+        resolve(event.data.messages);
+        worker.terminate();
+      };
+
+      worker.onerror = err => {
+        reject(err.error ?? err);
+        worker.terminate();
+      };
+
+      worker.postMessage({
+        text,
+        isAnonymous,
+        parseAttachments: file instanceof JSZip,
+      });
+    });
+
+  return fileToText(file).then(async text => {
+    if (!text) return [];
+
+    try {
+      // Use a worker for large files to avoid blocking the UI thread.
+      if (text.length > 2_000_000) return await parseInWorker(text);
+    } catch (err) {
+      // eslint-disable-next-line no-console
+      console.warn(
+        'Worker parse failed, falling back to main thread parse.',
+        err,
+      );
+    }
+
+    return parseInMainThread(text);
   });
 }
 
@@ -123,6 +171,50 @@ function filterMessagesByDate(
   );
 }
 
+function searchMessages(
+  messages: IndexedMessage[],
+  rawQuery: string,
+  maxResults = 200,
+): SearchMessagesOutput {
+  const query = rawQuery.trim().toLowerCase();
+
+  if (!query) return { total: 0, results: [] };
+
+  const results: SearchMessagesOutput['results'] = [];
+  let total = 0;
+
+  messages.forEach(message => {
+    const loweredMessage = message.message.toLowerCase();
+    const matchPosition = loweredMessage.indexOf(query);
+
+    if (matchPosition === -1) return;
+
+    total += 1;
+    if (results.length >= maxResults) return;
+
+    const excerptStart = Math.max(0, matchPosition - 40);
+    const excerptEnd = Math.min(
+      message.message.length,
+      matchPosition + query.length + 80,
+    );
+    const rawExcerpt = message.message
+      .slice(excerptStart, excerptEnd)
+      .replace(/\s+/g, ' ')
+      .trim();
+    const excerptPrefix = excerptStart > 0 ? '... ' : '';
+    const excerptSuffix = excerptEnd < message.message.length ? ' ...' : '';
+
+    results.push({
+      index: message.index,
+      author: message.author,
+      date: message.date,
+      excerpt: `${excerptPrefix}${rawExcerpt}${excerptSuffix}`,
+    });
+  });
+
+  return { total, results };
+}
+
 function capitalize(str: string) {
   return str.charAt(0).toUpperCase() + str.slice(1);
 }
@@ -139,5 +231,6 @@ export {
   getISODateString,
   extractStartEndDatesFromMessages,
   filterMessagesByDate,
+  searchMessages,
   capitalize,
 };

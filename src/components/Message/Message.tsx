@@ -23,6 +23,7 @@ interface IMessage {
   message: IndexedMessage;
   color: string;
   isActiveUser: boolean;
+  isSearchFocused: boolean;
   sameAuthorAsPrevious: boolean;
 }
 
@@ -30,6 +31,7 @@ function Message({
   message,
   color,
   isActiveUser,
+  isSearchFocused,
   sameAuthorAsPrevious,
 }: IMessage) {
   const isSystem = !message.author;
@@ -53,11 +55,16 @@ function Message({
 
   return (
     <S.Item
+      id={`message-${message.index}`}
       $isSystem={isSystem}
       $isActiveUser={isActiveUser}
       $sameAuthorAsPrevious={sameAuthorAsPrevious}
     >
-      <S.Bubble $isSystem={isSystem} $isActiveUser={isActiveUser}>
+      <S.Bubble
+        $isSystem={isSystem}
+        $isActiveUser={isActiveUser}
+        $isSearchFocused={isSearchFocused}
+      >
         <S.Index $isSystem={isSystem} $isActiveUser={isActiveUser}>
           {(message.index + 1).toLocaleString('de-CH')}
         </S.Index>

@@ -1,4 +1,11 @@
-import { useRef, useEffect, useState, startTransition } from 'react';
+import {
+  useRef,
+  useEffect,
+  useState,
+  useMemo,
+  useDeferredValue,
+  startTransition,
+} from 'react';
 import { useAtom, useAtomValue, useSetAtom } from 'jotai';
 
 import Credits from '../Credits/Credits';
@@ -10,10 +17,13 @@ import ActiveUserSelector from '../ActiveUserSelector/ActiveUserSelector';
 import * as S from './style';
 import {
   activeUserAtom,
+  focusedMessageIndexAtom,
   isAnonymousAtom,
   isMenuOpenAtom,
   messagesDateBoundsAtom,
+  messagesAtom,
   participantsAtom,
+  searchQueryAtom,
 } from '../../stores/global';
 import {
   datesAtom,
@@ -21,17 +31,31 @@ import {
   limitsAtom,
 } from '../../stores/filters';
 import { FilterMode } from '../../types';
+import { getISODateString, searchMessages } from '../../utils/utils';
+
+const SEARCH_RESULTS_LIMIT = 150;
+const SEARCH_CONTEXT_BEFORE = 30;
+const SEARCH_CONTEXT_AFTER = 120;
 
 function Sidebar() {
   const [isMenuOpen, setIsMenuOpen] = useAtom(isMenuOpenAtom);
   const [isAnonymous, setIsAnonymous] = useAtom(isAnonymousAtom);
+  const [searchQuery, setSearchQuery] = useAtom(searchQueryAtom);
   const [filterMode, setFilterMode] = useState<FilterMode>('index');
   const setGlobalFilterMode = useSetAtom(globalFilterModeAtom);
   const [limits, setLimits] = useAtom(limitsAtom);
+  const messages = useAtomValue(messagesAtom);
   const setDates = useSetAtom(datesAtom);
+  const setFocusedMessageIndex = useSetAtom(focusedMessageIndexAtom);
   const messagesDateBounds = useAtomValue(messagesDateBoundsAtom);
   const participants = useAtomValue(participantsAtom);
   const [activeUser, setActiveUser] = useAtom(activeUserAtom);
+  const deferredSearchQuery = useDeferredValue(searchQuery);
+
+  const searchData = useMemo(
+    () => searchMessages(messages, deferredSearchQuery, SEARCH_RESULTS_LIMIT),
+    [messages, deferredSearchQuery],
+  );
 
   const closeButtonRef = useRef<HTMLButtonElement>(null);
   const openButtonRef = useRef<HTMLButtonElement>(null);
@@ -54,6 +78,18 @@ function Sidebar() {
       end: e.currentTarget.endDate.valueAsDate,
     });
     setGlobalFilterMode('date');
+  };
+
+  const goToSearchResult = (messageIndex: number) => {
+    const messageNumber = messageIndex + 1;
+    const low = Math.max(1, messageNumber - SEARCH_CONTEXT_BEFORE);
+    const high = messageNumber + SEARCH_CONTEXT_AFTER;
+
+    setFilterMode('index');
+    setGlobalFilterMode('index');
+    setLimits({ low, high });
+    setFocusedMessageIndex(messageIndex);
+    setIsMenuOpen(false);
   };
 
   useEffect(() => {
@@ -112,6 +148,55 @@ function Sidebar() {
                 setMessagesByDate={setMessagesByDate}
               />
             )}
+
+            <S.Fieldset>
+              <legend>Search chat</legend>
+              <S.Field>
+                <S.Label htmlFor="search-chat">Search expression</S.Label>
+                <S.Input
+                  id="search-chat"
+                  type="text"
+                  value={searchQuery}
+                  onChange={e => setSearchQuery(e.target.value)}
+                  placeholder="Type text to search in all messages"
+                />
+              </S.Field>
+
+              {deferredSearchQuery.trim() && (
+                <S.Field>
+                  <S.InputDescription>
+                    Found {searchData.total.toLocaleString('de-CH')} matches
+                    {searchData.total > searchData.results.length &&
+                      `, showing first ${searchData.results.length}`}
+                  </S.InputDescription>
+                  {searchData.results.length === 0 && (
+                    <S.InputDescription>No matches found.</S.InputDescription>
+                  )}
+                  {searchData.results.length > 0 && (
+                    <S.SearchResults>
+                      {searchData.results.map(result => (
+                        <li
+                          key={`${result.index}-${result.date.toISOString()}`}
+                        >
+                          <S.SearchResultButton
+                            type="button"
+                            onClick={() => goToSearchResult(result.index)}
+                          >
+                            <S.SearchResultMeta>
+                              #{(result.index + 1).toLocaleString('de-CH')} ·{' '}
+                              {result.author ?? 'System'} ·{' '}
+                              {getISODateString(result.date)}
+                            </S.SearchResultMeta>
+                            <span>{result.excerpt}</span>
+                          </S.SearchResultButton>
+                        </li>
+                      ))}
+                    </S.SearchResults>
+                  )}
+                </S.Field>
+              )}
+            </S.Fieldset>
+
             <ActiveUserSelector
               participants={participants}
               activeUser={activeUser}

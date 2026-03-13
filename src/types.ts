@@ -30,6 +30,18 @@ interface PollStructure {
   maxVotes: number;
 }
 
+interface SearchMessageResult {
+  index: number;
+  author: string | null;
+  date: Date;
+  excerpt: string;
+}
+
+interface SearchMessagesOutput {
+  total: number;
+  results: SearchMessageResult[];
+}
+
 export type {
   FilterMode,
   ExtractedFile,
@@ -38,4 +50,6 @@ export type {
   DateBounds,
   PollOption,
   PollStructure,
+  SearchMessageResult,
+  SearchMessagesOutput,
 };

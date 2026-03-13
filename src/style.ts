@@ -8,6 +8,17 @@ const Container = styled.div`
   min-height: 100%;
 `;
 
+const MainLayout = styled.main`
+  flex: 1 1 auto;
+  min-height: 0;
+  position: relative;
+
+  @media (min-width: 1100px) {
+    display: grid;
+    grid-template-columns: clamp(280px, 22vw, 360px) minmax(0, 1fr);
+  }
+`;
+
 const Header = styled.header`
   padding: 10px;
   display: flex;
@@ -89,4 +100,4 @@ const GlobalStyles = createGlobalStyle`
   }
 `;
 
-export { GlobalStyles, Container, Header };
+export { GlobalStyles, Container, Header, MainLayout };

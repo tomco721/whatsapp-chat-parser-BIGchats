@@ -5,7 +5,7 @@ function Credits() {
         Made by <a href="https://lorisbettazza.com">Loris Bettazza</a>
         <br />
         View{' '}
-        <a href="https://github.com/Pustur/whatsapp-chat-parser-website">
+        <a href="https://github.com/tomco721/whatsapp-chat-parser-BIGchats">
           Source code
         </a>
       </small>

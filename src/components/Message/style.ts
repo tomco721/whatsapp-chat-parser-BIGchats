@@ -81,7 +81,11 @@ const Index = styled.div<{ $isSystem: boolean; $isActiveUser: boolean }>`
   }
 `;
 
-const Bubble = styled.div<{ $isSystem: boolean; $isActiveUser: boolean }>`
+const Bubble = styled.div<{
+  $isSystem: boolean;
+  $isActiveUser: boolean;
+  $isSearchFocused: boolean;
+}>`
   ${messageBaseStyle}
 
   position: relative;
@@ -127,6 +131,13 @@ const Bubble = styled.div<{ $isSystem: boolean; $isActiveUser: boolean }>`
       opacity: 1;
     }
   }
+
+  ${props =>
+    props.$isSearchFocused &&
+    css`
+      outline: 2px solid #07bc4c;
+      outline-offset: 1px;
+    `}
 `;
 
 const Wrapper = styled.div`

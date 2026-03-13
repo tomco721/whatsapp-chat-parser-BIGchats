@@ -58,8 +58,10 @@ function App() {
             Download example chat
           </a>
         </S.Header>
-        <MessageViewer />
-        {messages.length > 0 && <Sidebar />}
+        <S.MainLayout>
+          {messages.length > 0 && <Sidebar />}
+          <MessageViewer />
+        </S.MainLayout>
       </S.Container>
     </>
   );

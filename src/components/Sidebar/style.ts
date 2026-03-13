@@ -61,6 +61,10 @@ const MenuOpenButton = styled.button`
     left: 2rem;
     bottom: 2rem;
   }
+
+  @media (min-width: 1100px) {
+    display: none;
+  }
 `;
 
 const MenuCloseButton = styled.button`
@@ -108,6 +112,10 @@ const MenuCloseButton = styled.button`
       background-color: white;
     }
   }
+
+  @media (min-width: 1100px) {
+    display: none;
+  }
 `;
 
 const Overlay = styled.button<{ $isActive: boolean }>`
@@ -127,6 +135,10 @@ const Overlay = styled.button<{ $isActive: boolean }>`
     css`
       pointer-events: none;
     `}
+
+  @media (min-width: 1100px) {
+    display: none;
+  }
 `;
 
 const Sidebar = styled.aside<{ $isOpen: boolean }>`
@@ -143,6 +155,17 @@ const Sidebar = styled.aside<{ $isOpen: boolean }>`
   @media (prefers-color-scheme: dark) {
     background-color: #262d31;
   }
+
+  @media (min-width: 1100px) {
+    position: sticky;
+    width: auto;
+    top: 0;
+    bottom: auto;
+    height: calc(100vh - 0px);
+    transform: none;
+    border-right: 1px solid rgba(0, 0, 0, 0.08);
+    z-index: auto;
+  }
 `;
 
 const SidebarContainer = styled.div`
@@ -156,9 +179,15 @@ const SidebarContainer = styled.div`
   right: 0;
   padding: 1rem;
   border-top: 1px solid #eee;
+  overflow: auto;
 
   @media (prefers-color-scheme: dark) {
     border-color: #444;
+  }
+
+  @media (min-width: 1100px) {
+    top: 0;
+    border-top: 0;
   }
 `;
 
@@ -283,6 +312,42 @@ const InputDescription = styled.div`
   opacity: 0.6;
 `;
 
+const SearchResults = styled.ul`
+  margin: 0.5rem 0 0;
+  padding: 0;
+  list-style: none;
+  max-height: 220px;
+  overflow: auto;
+
+  > * + * {
+    margin-top: 0.35rem;
+  }
+`;
+
+const SearchResultButton = styled.button`
+  ${normalizeButton}
+
+  display: block;
+  width: 100%;
+  padding: 0.5rem;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  border-radius: 4px;
+  text-align: left;
+  background-color: #fafafa;
+  line-height: 1.35;
+
+  @media (prefers-color-scheme: dark) {
+    background-color: #222;
+    border-color: #444;
+  }
+`;
+
+const SearchResultMeta = styled.div`
+  font-size: 75%;
+  opacity: 0.75;
+  margin-bottom: 0.2rem;
+`;
+
 export {
   MenuOpenButton,
   MenuCloseButton,
@@ -300,4 +365,7 @@ export {
   RadioField,
   Label,
   ToggleCheckbox,
+  SearchResults,
+  SearchResultButton,
+  SearchResultMeta,
 };

@@ -10,6 +10,8 @@ import {
 const isMenuOpenAtom = atom(false);
 const activeUserAtom = atom('');
 const isAnonymousAtom = atom(false);
+const searchQueryAtom = atom('');
+const focusedMessageIndexAtom = atom<number | null>(null);
 const rawFileAtom = atom<FileReader['result']>(null);
 const extractedFileAtom = atom(get => extractFile(get(rawFileAtom)));
 const messagesAtom = atom(get =>
@@ -27,6 +29,8 @@ export {
   isMenuOpenAtom,
   activeUserAtom,
   isAnonymousAtom,
+  searchQueryAtom,
+  focusedMessageIndexAtom,
   rawFileAtom,
   messagesAtom,
   participantsAtom,
